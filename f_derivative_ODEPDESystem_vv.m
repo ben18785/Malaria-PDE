@@ -1,4 +1,4 @@
-function dYdt = f_derivative_ODEPDESystem_vv(t,Y,v_parameters,v_areaBreed,v_areaFeed,N,m_lap)
+function dYdt = f_derivative_ODEPDESystem_vv(t,Y,v_parameters,v_areaBreed,v_areaFeed,N,m_lap,cell_numberVectors)
 % A function which returns the derivative of the various components of both
 % the ODEs (Jx,Jy,My,Ox) and PDEs (Hx,Ox)
 
@@ -29,17 +29,48 @@ c_gamma_h = v_parameters(20);
 c_mu_o = v_parameters(21);
 c_diffusion = v_parameters(22);
 
-% First of all get the derivatives for the ODE variables (multiply the lot
-% by the breeding area vectors to make sure they stay localised there - makes derivative zero therefore no growing/shrinking)
-dJxdt = v_areaBreed.*(0.5*c_kappa*c_nu*v_Ox - c_gamma_j*v_Jx - c_mu_j*v_Jx - c_alpha*v_Jx.*(v_Jx + v_Jy));
-dJydt = v_areaBreed.*(0.5*c_kappa*c_nu*v_Ox - c_gamma_j*v_Jy - c_mu_j*v_Jy - c_alpha*v_Jy.*(v_Jx + v_Jy));
-dMydt = v_areaBreed.*(c_gamma_j*v_Jy - c_mu_m*v_My);
-dUxdt = v_areaBreed.*(c_gamma_j*v_Jx - c_mu_u*v_Ux - c_m*v_Ux.*v_My);
 
-% Now work on the PDE components
-dHxdt = c_diffusion*m_lap*v_Hx + c_m*v_Ux + c_nu*v_Ox - c_gamma_h*v_Hx - c_mu_h*v_Hx;
-dOxdt = c_diffusion*m_lap*v_Ox + c_gamma_h*v_Hx - c_nu*v_Ox - c_mu_o*v_Ox;
 
+
+
+if v_parameters(23) == 0 % If simple
+    
+    % Get the derivatives for the ODE variables (multiply the lot
+    % by the breeding area vectors to make sure they stay localised there - makes derivative zero therefore no growing/shrinking)
+    dJxdt = v_areaBreed.*(0.5*c_kappa*c_nu*v_Ox - c_gamma_j*v_Jx - c_mu_j*v_Jx - c_alpha*v_Jx.*(v_Jx + v_Jy));
+    dJydt = v_areaBreed.*(0.5*c_kappa*c_nu*v_Ox - c_gamma_j*v_Jy - c_mu_j*v_Jy - c_alpha*v_Jy.*(v_Jx + v_Jy));
+    dMydt = v_areaBreed.*(c_gamma_j*v_Jy - c_mu_m*v_My);
+    dUxdt = v_areaBreed.*(c_gamma_j*v_Jx - c_mu_u*v_Ux - c_m*v_Ux.*v_My);
+    
+    % Work on the PDE components
+    dHxdt = c_diffusion*m_lap*v_Hx + c_m*v_Ux.*v_My + c_nu*v_Ox - c_gamma_h*v_Hx - c_mu_h*v_Hx;
+    dOxdt = c_diffusion*m_lap*v_Ox + c_gamma_h*v_Hx - c_nu*v_Ox - c_mu_o*v_Ox;
+else
+    % Get the distance matrices
+    v_numberNu = cell_numberVectors{1};
+    v_numberGammaH = cell_numberVectors{2};
+    v_numberM = cell_numberVectors{3};
+    v_numberAlpha = v_Jx + v_Jy;
+    
+    % Use distances to create localised egg laying rates, feeding rates,
+    % competition amongst juveniles, and mating rates
+    v_nu = c_nu*v_numberNu;
+    v_gamma_h = c_gamma_h*v_numberGammaH;
+    v_m = c_m*v_numberM;
+    v_alpha = c_alpha*v_numberAlpha;
+    
+    % Get the derivatives for the ODE variables (multiply the lot
+    % by the breeding area vectors to make sure they stay localised there - makes derivative zero therefore no growing/shrinking)
+    dJxdt = v_areaBreed.*(0.5*c_kappa*v_nu.*v_Ox - c_gamma_j*v_Jx - c_mu_j*v_Jx - v_alpha.*v_Jx.*(v_Jx + v_Jy));
+    dJydt = v_areaBreed.*(0.5*c_kappa*v_nu.*v_Ox - c_gamma_j*v_Jy - c_mu_j*v_Jy - v_alpha.*v_Jy.*(v_Jx + v_Jy));
+    dMydt = v_areaBreed.*(c_gamma_j*v_Jy - c_mu_m*v_My);
+    dUxdt = v_areaBreed.*(c_gamma_j*v_Jx - c_mu_u*v_Ux - v_m.*v_Ux.*v_My);
+    
+    % Work on the PDE components
+    dHxdt = c_diffusion*m_lap*v_Hx + v_m.*v_Ux.*v_My + c_nu*v_Ox - v_gamma_h.*v_Hx - c_mu_h*v_Hx;
+    dOxdt = c_diffusion*m_lap*v_Ox + v_gamma_h.*v_Hx - c_nu*v_Ox - c_mu_o*v_Ox;
+    
+end
 % Put all into a vector
 dYdt = [dJxdt; dJydt; dMydt; dUxdt; dHxdt; dOxdt];
 

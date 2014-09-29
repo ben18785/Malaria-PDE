@@ -18,5 +18,6 @@ function [m_areaBreed,m_areaFeed,cell_densities] = f_updateSystem_cell(m_areaBre
         m_areaFeed = f_updateFeed_m(m_areaFeed,cell_densities,v_parameters);
      end
     
+     
     % Update the densities of the various components
     cell_densities = f_updateDensities_ODEPDETogether_cell(m_areaBreed,m_areaFeed,cell_densities,v_parameters,c_T);

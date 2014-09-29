@@ -1,0 +1,14 @@
+function m_juveniles = f_initialJuveniles_m(m_areaBreed,c_initialJuveniles,U)
+    % A function which places juveniles at random breed sites throughout
+    % the domain
+    m_juveniles = zeros(U,U);
+    
+    % Get the locations of the breed sites
+    [v_x,v_y] = find(m_areaBreed);
+    c_len = size(m_areaBreed,1);
+    
+    y = datasample(data,k)
+    for i = 1:c_initialJuveniles
+        
+        m_juveniles
+    

@@ -6,7 +6,7 @@ clear; close all; clc;
 U = 150; % For now make actual distances be U x 10m. Therefore U=100 => 1km 
 
 % Time length of simulation
-c_T = 100; 
+c_T = 10; 
 
 c_breedVariance = 0; % Governs whether the breeding site number varies
 c_feedVariance = 0; % Governs whether the feeding site number varies
@@ -30,7 +30,7 @@ c_m = 0.01*pi*c_SM*c_SM;
 c_mu_h = 0.1;
 c_gamma_h = 0.015*c_H;
 c_mu_o = 0.1;
-c_diffusion = 10;
+c_diffusion = 1;
 
 v_parameters = zeros(21,1);
 v_parameters(1) = c_breedVariance;
@@ -61,7 +61,7 @@ v_parameters(22) = c_diffusion;
 %% Initialise the areas and fields
 % Create breeding sites randomly
 
-m_areaBreed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaB*1e-6);
+m_areaBreed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaB*1e-4);
 c_mid = round(U/2);
 m_areaBreed(c_mid,c_mid) = 1; % Create one breeding site in the middle of the domain to put in the initial juveniles
 
