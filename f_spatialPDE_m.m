@@ -1,24 +1,15 @@
-clear; close all; clc;
-
+function m_all = f_spatialPDE_m(c_pa_thetaB,c_pa_thetaA,U,c_T)
+    % A function which simulates the spatial PDE model, and returns a
+    % matrix with the number of mosquitos of each type across time
 
 %% Set parameters
-% Simulation size
-U = 100; % For now make actual distances be U x 10m. Therefore U=100 => 1km 
-
-% Time length of simulation
-c_T = 100; 
 
 c_breedVariance = 0; % Governs whether the breeding site number varies
 c_feedVariance = 0; % Governs whether the feeding site number varies
-c_diffusionLocalSwitch = 1; % Turns on or off local diffusion coefficients
-c_diffusion = 10; % Think that a parameter value of 10 means 10000m2/day. This is multiplied by the distance matrix for breeding sites.
-c_diffusionLocalType = 1; % Choose the type of rule to use for local diffusion. 0 means take c_diffusion and multiply it by the distance matrix. 1 means diffusion = c_diffusion/c_diffusionBeta^m_number(i,j). 
-c_beta = 3; % The rate of reduction in diffusion if c_diffusionLocalType = 1
+c_diffusion = 1; % Think that a parameter value of 10 means 10000m2/day. This is multiplied by the distance matrix for breeding sites.
 c_simple = 1; % Choose whether to use derived parameters from the ODE model, or allow spatial variance in breeding and feeding
 c_randinitiate = 1; % Choose whether to allocate juveniles initially at a point in centre of domain (0); or randomly throughout the space (1)
 c_initialJuveniles = 10000;
-c_pa_thetaB = 32e-4;
-c_pa_thetaA = 4e-4;
 c_S0 = 15;
 c_SH = 50;
 c_SM = 30;
@@ -83,20 +74,17 @@ v_parameters(20) = c_gamma_h;
 v_parameters(21) = c_mu_o;
 v_parameters(22) = c_diffusion;
 v_parameters(23) = c_simple;
-v_parameters(24) = c_diffusionLocalSwitch;
-v_parameters(25) = c_diffusionLocalType;
-v_parameters(26) = c_beta;
-
 
 
 
 %% Initialise the areas and fields
 % Create breeding sites randomly
 m_areaBreed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaB);
+disp(strcat('The number of breeding sites is: ',num2str(sum(sum(m_areaBreed)))))
 
 % Create feeding sites randomly
 m_areaFeed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaA);
-
+disp(strcat('The number of breeding sites is: ',num2str(sum(sum(m_areaFeed)))))
 
 % Create the initial fields of Hx and Ox
 m_Hx = zeros(U,U);
@@ -133,6 +121,8 @@ cell_densities{6} = m_Ox;
 
 %% Evolve system
 [m_areaBreed,m_areaFeed,cell_densities] = f_updateSystem_cell(m_areaBreed,m_areaFeed,cell_densities,v_parameters,c_T);
+
+%% Collect results
 c_len = length(cell_densities);
 
 v_Jx_time = zeros(c_len,1);
@@ -141,7 +131,6 @@ v_My_time = zeros(c_len,1);
 v_Ux_time = zeros(c_len,1);
 v_Hx_time = zeros(c_len,1);
 v_Ox_time = zeros(c_len,1);
-
 
 for i = 1:c_len
     m_Jx = cell_densities{i,1};
@@ -157,12 +146,5 @@ for i = 1:c_len
     v_Hx_time(i) = sum(sum(m_Hx));
     v_Ox_time(i) = sum(sum(m_Ox));
     
-    subplot(1,2,1),plot(v_Ox_time(1:i))
-    xlim([0 c_len])
-    subplot(1,2,2),imagesc(m_Ox)
-    pause(0.3)
 end
-m_all = [v_Jx_time,v_Jy_time,v_My_time,v_Ux_time,v_Hx_time,v_Ox_time];
-m_total = sum(m_all,2);
-plot(m_total)
-    
+m_all = [v_Jx_time,v_Jy_time,v_My_time,v_Ux_time,v_Hx_time,v_Ox_time];   

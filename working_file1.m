@@ -61,13 +61,13 @@ v_parameters(22) = c_diffusion;
 %% Initialise the areas and fields
 % Create breeding sites randomly
 
-m_areaBreed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaB*1e-6);
+m_areaBreed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaB*1e-4);
 c_mid = round(U/2);
 m_areaBreed(c_mid,c_mid) = 1; % Create one breeding site in the middle of the domain to put in the initial juveniles
 
 % Create feeding sites randomly
 
-m_areaFeed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaA*1e-6);
+m_areaFeed = f_breedOrFeedCreateInitial_m(U,c_pa_thetaA*1e-4);
 
 % Create the initial fields of Hx and Ox
 m_Hx = zeros(U,U);

@@ -51,6 +51,13 @@ else
     v_numberGammaH = cell_numberVectors{2};
     v_numberM = cell_numberVectors{3};
     v_numberAlpha = v_Jx + v_Jy;
+    if v_parameters(24) == 0
+        v_distanceBreed = ones(N,1);
+        v_distanceFeed = ones(N,1);
+    else
+        v_distanceBreed = cell_numberVectors{4};
+        v_distanceFeed = cell_numberVectors{5};
+    end
     
     % Use distances to create localised egg laying rates, feeding rates,
     % competition amongst juveniles, and mating rates
@@ -59,6 +66,17 @@ else
     v_m = c_m*v_numberM;
     v_alpha = c_alpha*v_numberAlpha;
     
+    % Dependent on the type of local diffusion processes calculate the
+    % local diffusion rate
+    if v_parameters(25) == 0
+        v_diffusionBreed = c_diffusion*v_distanceBreed;
+        v_diffusionFeed = c_diffusion*v_distanceFeed;
+    else
+        c_beta = v_parameters(26);
+        v_diffusionBreed = (c_diffusion./(c_beta.^(v_numberGammaH-min(v_numberGammaH))));
+        v_diffusionFeed = (c_diffusion./(c_beta.^(v_numberM-min(v_numberM))));
+    end
+        
     % Get the derivatives for the ODE variables (multiply the lot
     % by the breeding area vectors to make sure they stay localised there - makes derivative zero therefore no growing/shrinking)
     dJxdt = v_areaBreed.*(0.5*c_kappa*v_nu.*v_Ox - c_gamma_j*v_Jx - c_mu_j*v_Jx - v_alpha.*v_Jx.*(v_Jx + v_Jy));
@@ -67,8 +85,8 @@ else
     dUxdt = v_areaBreed.*(c_gamma_j*v_Jx - c_mu_u*v_Ux - v_m.*v_Ux.*v_My);
     
     % Work on the PDE components
-    dHxdt = c_diffusion*m_lap*v_Hx + v_m.*v_Ux.*v_My + c_nu*v_Ox - v_gamma_h.*v_Hx - c_mu_h*v_Hx;
-    dOxdt = c_diffusion*m_lap*v_Ox + v_gamma_h.*v_Hx - c_nu*v_Ox - c_mu_o*v_Ox;
+    dHxdt = v_diffusionFeed.*(m_lap*v_Hx) + v_m.*v_Ux.*v_My + v_nu.*v_Ox - v_gamma_h.*v_Hx - c_mu_h*v_Hx;
+    dOxdt = v_diffusionBreed.*(m_lap*v_Ox) + v_gamma_h.*v_Hx - v_nu.*v_Ox - c_mu_o*v_Ox;
     
 end
 % Put all into a vector

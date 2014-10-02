@@ -13,7 +13,7 @@ m_distance_new = ones(U,U).*(m_distance == c_distance);
 
 % Get the indices of the cells wanted
 m_distanceindices = f_cellindices_all_m(m_distance_new);
-cn_dist = length_new(m_distanceindices);
+cn_dist = size(m_distanceindices,1);
 
 % First make a list of all the indices of 8 NN
 m_NN = [];
@@ -27,7 +27,7 @@ m_NN = unique(m_NN,'Rows');
 
 % Now iterate through the indices desired and make all their NNs which are yet to be 
 % filled in (ie have a value of minus one) equal to (c_distance + 1)
-cn_nn = length_new(m_NN);
+cn_nn = size(m_NN,1);
 
 for i = 1:cn_nn
    if m_distance(m_NN(i,1),m_NN(i,2)) == -1
